@@ -8,7 +8,7 @@ import {
   NewPendingOwnership,
   Transfer
 } from "../generated/GraphToken/GraphToken"
-import { ExampleEntity } from "../generated/schema"
+import { User, ExampleEntity } from "../generated/schema"
 
 export function handleApproval(event: Approval): void {
   // Entities can be loaded from the store using a string ID; this ID
@@ -66,12 +66,25 @@ export function handleApproval(event: Approval): void {
   // - contract.transferFrom(...)
 }
 
-export function handleMinterAdded(event: MinterAdded): void {}
+// export function handleMinterAdded(event: MinterAdded): void {}
 
-export function handleMinterRemoved(event: MinterRemoved): void {}
+// export function handleMinterRemoved(event: MinterRemoved): void {}
 
-export function handleNewOwnership(event: NewOwnership): void {}
+// export function handleNewOwnership(event: NewOwnership): void {}
 
-export function handleNewPendingOwnership(event: NewPendingOwnership): void {}
+// export function handleNewPendingOwnership(event: NewPendingOwnership): void {}
 
-export function handleTransfer(event: Transfer): void {}
+export function handleTransfer(event: Transfer): void {
+  let user = User.load(event.params.from.toHexString());
+  if (user == null) {
+    user = new User(event.params.from.toHexString());
+    user.totalTransfers = BigInt.fromI32(0);
+    user.totalAmount = BigInt.fromI32(0);
+  }
+
+  user.totalTransfers = user.totalTransfers.plus(BigInt.fromI32(1));
+  user.totalAmount = user.totalAmount.plus(event.params.value);
+
+  user.save();
+
+}
